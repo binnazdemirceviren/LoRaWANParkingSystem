@@ -1,0 +1,2 @@
+# LoRaWANParkingSystem
+Bitirme projesi
