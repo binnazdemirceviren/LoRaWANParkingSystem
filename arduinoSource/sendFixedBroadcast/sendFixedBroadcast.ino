@@ -36,27 +36,27 @@ int tempStatus = 1;
 
 // --------------- Adress Variables ----------------
 byte brodcastAdr[2] = {0,244}; // adrH, adrL
-byte myAdr[2] = {2,56}; // adrH, adrL
+//byte myAdr[2] = {2,56}; // adrH, adrL //568
+//byte myAdr[2] = {0,251}; // adrH, adrL //251
+byte myAdr[2] = {1,16}; // adrH, adrL //272
 // -------------------------------------------------
 
 void sendMessageToBrodcast(byte code, byte adrH, byte adrL);
 int getSensorStatus();
+int delayedSensorResult();
 bool listenAck();
 
-void setup()
-{ pinMode(trig, OUTPUT);
-  pinMode(echo, INPUT);
+void setup(){
+  	pinMode(trig, OUTPUT);
+  	pinMode(echo, INPUT);
   
 	Serial.begin(9600);
-	while (!Serial) {
-	    ; // wait for serial port to connect. Needed for native USB
-    }
 	delay(100);
 
 	e32ttl.begin();
 }
 
-struct Message {
+struct Message{
     byte code;
     byte adrH;
     byte adrL;
@@ -64,55 +64,75 @@ struct Message {
 
 
 void loop(){
-  delay(100);
-  sensorStatus = getSensorStatus();
+	sensorStatus = getSensorStatus();
+	delay(100);
 
-  if(tempStatus != sensorStatus){
-    bool ackRecieved = false;
-    sendMessageToBrodcast((byte)sensorStatus, myAdr[0], myAdr[1]);
-    /*while(!ackRecieved){
-      ackRecieved = listenAck();
-    }*/
-    tempStatus = sensorStatus; 
-  }
+	if(tempStatus != sensorStatus){
+		sensorStatus = delayedSensorResult();
+		if(tempStatus != sensorStatus){
+			//bool ackRecieved = false;
+			sendMessageToBrodcast((byte)sensorStatus, myAdr[0], myAdr[1]);
+			/*while(!ackRecieved){
+				ackRecieved = listenAck();
+				if(ackRecieved)
+					Serial.println("XXX");
+			}*/
+			tempStatus = sensorStatus;
+		}
+	}
 }
 
 void sendMessageToBrodcast(byte code, byte adrH, byte adrL){  
-  Message msg = {code,adrH,adrL};
+  	Message msg = {code,adrH,adrL};
   
-  ResponseStatus rs = e32ttl.sendFixedMessage(brodcastAdr[0],brodcastAdr[1],23,&msg, sizeof(Message));
-  Serial.println(rs.getResponseDescription());
+  	ResponseStatus rs = e32ttl.sendFixedMessage(brodcastAdr[0],brodcastAdr[1],23,&msg, sizeof(Message));
+  	Serial.println(rs.getResponseDescription());
 }
 
 int getSensorStatus(){
-  digitalWrite(trig, HIGH);
-  delayMicroseconds(1000);
-  digitalWrite(trig, LOW);
+	digitalWrite(trig, HIGH);
+	delayMicroseconds(1000);
+	digitalWrite(trig, LOW);
   
-  deltaTime = pulseIn(echo, HIGH);
-  distance = (deltaTime / 29.1) / 2;
-  if(distance > 100)
-    distance = 100;
-  if(distance < 50){
-    //Dolu
-    return 2;
-  }else{
-    //Boş
-    return 1;
-  }
+	deltaTime = pulseIn(echo, HIGH);
+	distance = (deltaTime / 29.1) / 2;
+	if(distance > 100)
+		distance = 100;
+	if(distance < 50)
+		return 2; //Dolu
+	else
+    	return 1; //Boş
+}
+
+int delayedSensorResult(){
+	int oneCount = 0;
+	int twoCount = 0;
+    while ((oneCount + twoCount) < 9){
+		int temp = getSensorStatus();
+		if (temp == 2)
+            twoCount++;
+        else if(temp == 1)
+            oneCount++;
+		delay(100);
+	}
+	
+    if (twoCount > oneCount)
+		return 2;
+	else
+		return 1;
 }
 
 bool listenAck(){
-  if (e32ttl.available()>1){
-    ResponseStructContainer rsc = e32ttl.receiveMessage(sizeof(Message));
-    Message msg = *(Message*) rsc.data;
+	if (e32ttl.available()>1){
+		ResponseStructContainer rsc = e32ttl.receiveMessage(sizeof(Message));
+		Message msg = *(Message*) rsc.data;
 
-    if (rsc.status.code != 1){
-      rsc.status.getResponseDescription();
-    }else if(msg.code == 0){ //ACK Type Message
-      Serial.println("Gönderilen mesaj yerine ulasti.");
-      return true;
-    }
-  }
-  return false;
+		if (rsc.status.code != 1){
+    		rsc.status.getResponseDescription();
+		}else if(msg.code == 0){ //ACK Type Message
+    		Serial.println("Gönderilen mesaj yerine ulasti.");
+    		return true;
+    	}
+  	}
+  	return false;
 }

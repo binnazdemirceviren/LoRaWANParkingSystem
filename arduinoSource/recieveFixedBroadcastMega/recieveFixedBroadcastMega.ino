@@ -3,17 +3,22 @@
 
 #include <Ethernet.h>
 #include "secrets.h"
-#include "ThingSpeak.h" 
+#include "ThingSpeak.h"
+#include <LinkedList.h>
 
 // ---------------- Arduino pins -------------------
 
 LoRa_E32 e32ttl(2, 3); // Config without connect AUX and M0 M1
 
+//#include <SoftwareSerial.h>
+//SoftwareSerial mySerial(0, 3); // Arduino RX <-- e32 TX, Arduino TX --> e32 RX
+//LoRa_E32 e32ttl(&mySerial);
+
 // -------------------------------------------------
 
 // --------------- Adress Variables ----------------
 
-byte brodcastAdr[2] = {0,244}; //adrH adrL
+byte brodcastAdr[2] = {0, 244}; //adrH adrL
 
 // -------------------------------------------------
 
@@ -32,47 +37,7 @@ const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 
 // ---------------------------------------------------
 
-
-int MsgToCode(byte msgCode, int adr);
-
-void setup() {
-  Serial.begin(9600);
-
-  // Startup all pins and UART
-  e32ttl.begin();
-
-  Serial.println();
-  Serial.println("Start listening!"); 
-
-  Ethernet.init(10);  // Most Arduino Ethernet hardware
-      
-  // start the Ethernet connection:
-  Serial.println("Initialize Ethernet with DHCP:");
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
-    // Check for Ethernet hardware present
-    if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-      Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
-      while (true) {
-        delay(1); // do nothing, no point running without Ethernet hardware
-      }
-    }
-    if (Ethernet.linkStatus() == LinkOFF) {
-      Serial.println("Ethernet cable is not connected.");
-    }
-    // try to congifure using IP address instead of DHCP:
-    Ethernet.begin(mac, ip, myDns);
-  } else {
-    Serial.print("  DHCP assigned IP ");
-    Serial.println(Ethernet.localIP());
-  }
-  // give the Ethernet shield a second to initialize:
-  delay(1000);
-  
-  ThingSpeak.begin(client);  // Initialize ThingSpeak
-
-  Serial.println("Ready to go!");
-}
+LinkedList<int> codeQueue;
 
 struct Message {
     byte code;
@@ -80,53 +45,118 @@ struct Message {
     byte adrL;
 } message;
 
-void loop() {
-  // If something available
-  if (e32ttl.available()>1) {
+unsigned long previousTime = millis();
+int MsgToCode(byte msgCode, int adr);
+int sendData(int code);
+void sendACK(Message msg);
+void listenBroadcast();
+void updateWeb();
 
-    Serial.println("Lora is Available to recive");
-    // read the String message
-    ResponseStructContainer rsc = e32ttl.receiveMessage(sizeof(Message));
-    Message msg = *(Message*) rsc.data;
+void setup() {
+    Serial.begin(9600);
 
-    // Is something goes wrong print error
-      if (rsc.status.code!=1){ 
-        rsc.status.getResponseDescription();
-      }else{
+    // Startup all pins and UART
+    e32ttl.begin();
 
-        // Print the data received
-        /*Message responseMsg = {0,brodcastAdr[0],brodcastAdr[1]};
-      
-        ResponseStatus rs = e32ttl.sendFixedMessage(msg.adrH,msg.adrL,23,&responseMsg, sizeof(Message));
-        Serial.print("Mesaj tanindi mi? : ");
-        Serial.println(rs.getResponseDescription());
-        */
-        //Geri kalanı gelen mesajı yorumlamak.
+    Serial.println();
+    Serial.println("Start listening!");
 
-        Serial.print("Mesaj kodu : ");
-        Serial.println(msg.code);
-        Serial.print("Mesaj Adressi : ");
-        int msgAdress = (int)msg.adrH * 256 + msg.adrL;
-        Serial.println(msgAdress);
+    Ethernet.init(10);  // Most Arduino Ethernet hardware
 
-        int code = MsgToCode(msg.code, msgAdress);
-
-        ThingSpeak.setField(1, code);
-        int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
-          if(x == 200){
-            Serial.println("Channel update successful.");
-          }
-          else{
-            Serial.println("Problem updating channel. HTTP error code " + String(x));
-          }
-        
-        rsc.close();
+    // start the Ethernet connection:
+    Serial.println("Initialize Ethernet with DHCP:");
+    if (Ethernet.begin(mac) == 0) {
+      Serial.println("Failed to configure Ethernet using DHCP");
+      // Check for Ethernet hardware present
+      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+        Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+        while (true) {
+          delay(1); // do nothing, no point running without Ethernet hardware
+        }
+      }
+      if (Ethernet.linkStatus() == LinkOFF) {
+        Serial.println("Ethernet cable is not connected.");
+      }
+      // try to congifure using IP address instead of DHCP:
+      Ethernet.begin(mac, ip, myDns);
+    } else {
+      Serial.print("  DHCP assigned IP ");
+      Serial.println(Ethernet.localIP());
     }
-  }
+    // give the Ethernet shield a second to initialize:
+    delay(1000);
+
+    ThingSpeak.begin(client);  // Initialize ThingSpeak
+
+    Serial.println("Ready to go!");
 }
 
-int MsgToCode(byte msgCode, int adr ){
-  int code = msgCode * 1000;
-  code = code + adr;
-  return code;
+void loop() {
+	// If something available
+	listenBroadcast();
+    //Update Web
+	unsigned long currentTime = millis();
+    if (codeQueue.size() > 0 && currentTime - previousTime > 5000){
+		previousTime = currentTime;
+		updateWeb();
+    }
+}
+
+int MsgToCode(byte msgCode, int adr ) {
+	int code = msgCode * 1000;
+	code = code + adr;
+	return code;
+}
+
+int sendData(int code){
+    ThingSpeak.setField(1, code);
+	return ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+}
+
+void listenBroadcast(){
+    if (e32ttl.available() > 1) {
+
+      	Serial.println("Lora is Available to recive");
+      	// read the String message
+      	ResponseStructContainer rsc = e32ttl.receiveMessage(sizeof(Message));
+      	Message msg = *(Message*) rsc.data;
+
+      	// Is something goes wrong print error
+      	if (rsc.status.code != 1) {
+        	rsc.status.getResponseDescription();
+      	} else {
+			Serial.print("Mesaj kodu : ");
+			Serial.println(msg.code);
+			Serial.print("Mesaj Adresi : ");
+			int msgAdress = (int)msg.adrH * 256 + msg.adrL;
+			Serial.println(msgAdress);
+
+			int code = MsgToCode(msg.code, msgAdress);
+            //Code Diziye eklenecek.
+			codeQueue.add(code);
+
+			rsc.close();
+      	}
+    }
+}
+
+void updateWeb(){
+	int code = codeQueue.get(0);
+	int x = sendData(code);
+	
+	if (x == 200){
+	  	Serial.println("Channel update successful.");
+      	codeQueue.remove(0);
+	}else{
+	  	Serial.println("Problem updating channel. HTTP error code " + String(x));
+    }
+}
+
+//ACK mesajı geri yollama.
+void sendACK(Message msg){
+    Message responseMsg = {0,brodcastAdr[0],brodcastAdr[1]};
+
+    ResponseStatus rs = e32ttl.sendFixedMessage(msg.adrH,msg.adrL,23,&responseMsg, sizeof(Message));
+    Serial.print("Mesaj tanindi mi? : ");
+    Serial.println(rs.getResponseDescription());
 }
