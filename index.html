@@ -26,14 +26,18 @@
 <body>
 
 
+	<script
+		src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+	<link rel="stylesheet"
+		href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
+		type="text/css">
 	<div id="map"></div>
-
 	<script src="https://unpkg.com/es6-promise@4.2.4/dist/es6-promise.auto.min.js"></script>
 	<script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
 	<script>
-		var	konum1=[36.26267693406108, 41.341548855114];
-		var konum2=[36.260460555302664, 41.342952802563374];
-		var konum3=[36.26143543050793, 41.342191291344776];
+		var konum1 = [36.26267693406108, 41.341548855114];
+		var konum2 = [36.260460555302664, 41.342952802563374];
+		var konum3 = [36.26143543050793, 41.342191291344776];
 		var renk1;
 		var renk2;
 		var renk3;
@@ -42,33 +46,33 @@
 		fetch(url2)
 			.then(res => res.json())
 			.then((out) => {
-				console.log('Checkout this JSON! ', Math.floor(out.field1/1000));
+				console.log('Checkout this JSON! ', Math.floor(out.field1 / 1000));
 
 
-				if(out.field1%1000==568){
-					if (Math.floor(out.field1/1000)== 2) {
-					renk1 = "#f01818";
+				if (out.field1 % 1000 == 568) {
+					if (Math.floor(out.field1 / 1000) == 2) {
+						renk1 = "#f01818";
 					}
-					else if(Math.floor(out.field1/1000)== 1) {
-					renk1 = "#34c754";
+					else if (Math.floor(out.field1 / 1000) == 1) {
+						renk1 = "#34c754";
 					}
 				}
-				else if(out.field1%1000==272){
-					if (Math.floor(out.field1/1000)== 2) {
-					renk2 = "#f01818";
+				else if (out.field1 % 1000 == 272) {
+					if (Math.floor(out.field1 / 1000) == 2) {
+						renk2 = "#f01818";
 					}
-					else if(Math.floor(out.field1/1000)== 1) {
-					renk2 = "#34c754";
-				}				
+					else if (Math.floor(out.field1 / 1000) == 1) {
+						renk2 = "#34c754";
+					}
 				}
-				else if(out.field1%1000==251){
-					if (Math.floor(out.field1/1000)== 2) {
-					renk3 = "#f01818";
+				else if (out.field1 % 1000 == 251) {
+					if (Math.floor(out.field1 / 1000) == 2) {
+						renk3 = "#f01818";
 					}
-					else if(Math.floor(out.field1/1000)== 1) {
-					renk3 = "#34c754";
-					}				
-			}
+					else if (Math.floor(out.field1 / 1000) == 1) {
+						renk3 = "#34c754";
+					}
+				}
 
 				mapboxgl.accessToken = 'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
 				var mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
@@ -94,6 +98,12 @@
 								center: [36.260682, 41.342564],
 								zoom: 15
 							});
+							map.addControl(
+								new MapboxDirections({
+									accessToken: mapboxgl.accessToken
+								}),
+								'top-left'
+							);
 							console.log(renk1);
 							// Set options
 							var marker1 = new mapboxgl.Marker({
