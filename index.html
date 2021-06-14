@@ -1,130 +1,94 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>LoRaWAN Akıllı Park Sistemi</title>
-    <meta
-      name="viewport"
-      content="initial-scale=1,maximum-scale=1,user-scalable=no"
-    />
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.js"></script>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>LoRaWAN Akıllı Park Sistemi</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Font Awesome icons-->
+        <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+        <!--(includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body id="Sayfa-Üst">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
+            <div class="container">
+                <a class="navbar-brand" href="#Sayfa-Üst">LoRaWAN Akıllı Park Sistemi</a>
+                <button class="navbar-toggler text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
 
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="harita.html">Park Yerİ Bul</a></li>
 
-      #map {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 100%;
-      }
-    </style>
-  </head>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- giriş bölümü-->
+        <header class="masthead bg-primary text-white text-center" style="width: auto; height: 1000px;">
+            <div class="container d-flex align-items-center flex-column">
+                <!-- resim-->
+                <img class="masthead-avatar mb-5" src="assets/img/parking.png" alt="..." style="height: 200px; width:  450px; margin-top: 100px;"/>
+                <!--giriş yazısı-->
+                <h1 class="masthead-heading text-uppercase mb-0"style="margin-top: 50px;">LoRaWAN Akıllı Park Sistemi</h1>
+                <!-- Icon -->
+                <div class="divider-custom divider-light">
+                    <div class="divider-custom-line"></div>
+                    <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                    <div class="divider-custom-line"></div>
+                </div>
+            </div>
+        </header>
 
-  <body>
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
-      type="text/css"
-    />
-    <div id="map"></div>
-    <script src="https://unpkg.com/es6-promise@4.2.4/dist/es6-promise.auto.min.js"></script>
-    <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
-    <script>
-      var parkNoktalari = {
-        "251": [36.26267693406108, 41.341548855114],
-        "272": [36.260460555302664, 41.342952802563374],
-        "568": [36.26143543050793, 41.342191291344776],
-      };
-      var konum1Renk;
-      var konum2Renk;
-      var konum3renk;
-      const yesilRenk = '#34c754';
-      const kirmiziRenk = '#f01818';
-      let url2 =
-        'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
+        <!-- Footer-->
+        <footer class="footer text-center">
+            <div class="container">
+                <div class="row">
+                    <!-- Footer yer-->
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <h4 class="text-uppercase mb-4">Yerimiz</h4>
+                        <p class="lead mb-0">
+                            Ondokuz Mayıs Üniversitesi / Bilgayar Mühendisliği Bölümü
+                            <br />
+                            Samsun
+                        </p>
+                    </div>
+                    <!-- Footer sosyal medya-->
+                    <div class="col-lg-4 mb-5 mb-lg-0">
+                        <h4 class="text-uppercase mb-4">iNTERNETTE BİZ</h4>
+                        <a class="btn btn-outline-light btn-social mx-1" href="#!"><i class="fab fa-fw fa-instagram"></i></a>
+                        <a class="btn btn-outline-light btn-social mx-1" href="#!"><i class="fab fa-fw fa-twitter"></i></a>
+                        <a class="btn btn-outline-light btn-social mx-1" href="#!"><i class="fab fa-fw fa-linkedin-in"></i></a>
+                    </div>
+                    <!-- Footer Hakkımızda -->
+                    <div class="col-lg-4">
+                        <h4 class="text-uppercase mb-4">Biz</h4>
+                        <p class="lead mb-0">
+                            <p> Doğukan BALCI</p>
+                            <p> Gökhan VEYİSOĞLU</p>
+                            <p>  Binnaz DEMİRÇEVİREN</p>
+                            <p>  Feyza BOZKUŞ</p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <div class="copyright py-4 text-center text-white">
+        </div>
 
-      var map;
-      function fetchData() {
-        fetch(url2)
-          .then((res) => res.json())
-          .then((out) => {
-            setMarkers(out);
-          });
-      }
-      window.addEventListener('load', function () {
-        fetch(url2)
-          .then((res) => res.json())
-          .then((out) => {
-            mapboxgl.accessToken =
-              'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
-            var mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
-            mapboxClient.geocoding
-              .forwardGeocode({
-                query: 'Atakum,Samsun',
-                autocomplete: false,
-                limit: 1,
-              })
-              .send()
-              .then(function (response) {
-                if (
-                  response &&
-                  response.body &&
-                  response.body.features &&
-                  response.body.features.length
-                ) {
-                  var feature = response.body.features[0];
-
-                  map = new mapboxgl.Map({
-                    container: 'map',
-                    style: 'mapbox://styles/mapbox/streets-v11',
-                    center: [36.260682, 41.342564],
-                    zoom: 15,
-                  });
-                  map.addControl(
-                    new MapboxDirections({
-                      accessToken: mapboxgl.accessToken,
-                    }),
-                    'top-right'
-                  );
-
-                  Object.keys(parkNoktalari).forEach((key) => {
-                    new mapboxgl.Marker({
-                      draggable: false,
-                    })
-                    .setLngLat(parkNoktalari[key])
-                    .addTo(map);
-                  });
-                }
-              });
-          });
-        var fetchInterval = 5000;
-
-        setInterval(fetchData, fetchInterval);
-      });
-
-        function setMarkers(data) {
-            Object.keys(data).forEach((key) => {
-              if(key.includes('field') && data[key] !== '0') {
-                  const available = data[key].substring(0, 1);
-                  const parkNoktasi = data[key].substring(1, data[key].length);
-                  new mapboxgl.Marker({
-                      color: available === "1" ? yesilRenk : kirmiziRenk ,
-                      draggable: false,
-                    })
-                      .setLngLat(parkNoktalari[parkNoktasi])
-                      .addTo(map);
-              }
-            });
-        }
-    </script>
-  </body>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
+    </body>
 </html>
