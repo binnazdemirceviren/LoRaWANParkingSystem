@@ -38,6 +38,7 @@ const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 // ---------------------------------------------------
 
 LinkedList<int> codeQueue;
+LinkedList<int> tryList;
 
 struct Message {
     byte code;
@@ -47,7 +48,6 @@ struct Message {
 
 unsigned long previousTime = millis();
 int MsgToCode(byte msgCode, int adr);
-int sendData(int code);
 void sendACK(Message msg);
 void listenBroadcast();
 void updateWeb();
@@ -66,22 +66,22 @@ void setup() {
     // start the Ethernet connection:
     Serial.println("Initialize Ethernet with DHCP:");
     if (Ethernet.begin(mac) == 0) {
-      Serial.println("Failed to configure Ethernet using DHCP");
-      // Check for Ethernet hardware present
-      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-        Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
-        while (true) {
-          delay(1); // do nothing, no point running without Ethernet hardware
-        }
-      }
-      if (Ethernet.linkStatus() == LinkOFF) {
-        Serial.println("Ethernet cable is not connected.");
-      }
-      // try to congifure using IP address instead of DHCP:
-      Ethernet.begin(mac, ip, myDns);
+      	Serial.println("Failed to configure Ethernet using DHCP");
+      	// Check for Ethernet hardware present
+      	if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+        	Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+        	while (true) {
+          		delay(1); // do nothing, no point running without Ethernet hardware
+        	}
+      	}
+      	if (Ethernet.linkStatus() == LinkOFF) {
+        	Serial.println("Ethernet cable is not connected.");
+      	}
+    	// try to congifure using IP address instead of DHCP:
+    	Ethernet.begin(mac, ip, myDns);
     } else {
-      Serial.print("  DHCP assigned IP ");
-      Serial.println(Ethernet.localIP());
+    	Serial.print("  DHCP assigned IP ");
+    	Serial.println(Ethernet.localIP());
     }
     // give the Ethernet shield a second to initialize:
     delay(1000);
@@ -96,7 +96,7 @@ void loop() {
 	listenBroadcast();
     //Update Web
 	unsigned long currentTime = millis();
-    if (codeQueue.size() > 0 && currentTime - previousTime > 5000){
+    if (((codeQueue.size() > 0) || (tryList.size() > 0)) && currentTime - previousTime > 8500){
 		previousTime = currentTime;
 		updateWeb();
     }
@@ -106,11 +106,6 @@ int MsgToCode(byte msgCode, int adr ) {
 	int code = msgCode * 1000;
 	code = code + adr;
 	return code;
-}
-
-int sendData(int code){
-    ThingSpeak.setField(1, code);
-	return ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
 }
 
 void listenBroadcast(){
@@ -141,16 +136,42 @@ void listenBroadcast(){
 }
 
 void updateWeb(){
-	int code = codeQueue.get(0);
-	int x = sendData(code);
+
+	int listSize = tryList.size();
+	if (listSize == 0){
+		for (int i = 0; i < 8; i++){
+			tryList.add(codeQueue.shift());
+			if (codeQueue.size() == 0)
+				break;
+		}
+	}
+	else if (listSize > 0 || listSize < 8){
+		for (int i = listSize; i < 8; i++){
+			tryList.add(codeQueue.shift());
+			if (codeQueue.size() == 0)
+				break;
+		}
+	}
 	
-	if (x == 200){
+	//Buradan sonra listSize kullanma
+	for (int i = 0; i < 8; i++){
+		if (tryList.size() < i+1){
+			ThingSpeak.setField(i+1, 0);
+		}else{
+			int code = tryList.get(i);
+			ThingSpeak.setField(i+1, code);
+		}
+	}
+	
+	int result = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+	if (result == 200){
 	  	Serial.println("Channel update successful.");
-      	codeQueue.remove(0);
+      	tryList.clear();
 	}else{
-	  	Serial.println("Problem updating channel. HTTP error code " + String(x));
+	  	Serial.println("Problem updating channel. HTTP error code " + String(result) + ". Retrying");
     }
 }
+
 
 //ACK mesajı geri yollama.
 void sendACK(Message msg){
