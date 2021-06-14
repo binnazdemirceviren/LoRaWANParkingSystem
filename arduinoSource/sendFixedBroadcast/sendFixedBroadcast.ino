@@ -37,8 +37,8 @@ int tempStatus = 1;
 // --------------- Adress Variables ----------------
 byte brodcastAdr[2] = {0,244}; // adrH, adrL
 //byte myAdr[2] = {2,56}; // adrH, adrL //568
-//byte myAdr[2] = {0,251}; // adrH, adrL //251
-byte myAdr[2] = {1,16}; // adrH, adrL //272
+byte myAdr[2] = {0,251}; // adrH, adrL //251
+//byte myAdr[2] = {1,16}; // adrH, adrL //272
 // -------------------------------------------------
 
 void sendMessageToBrodcast(byte code, byte adrH, byte adrL);
