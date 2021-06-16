@@ -65,6 +65,7 @@
     <!-- Harita bölümü başlık-->
     <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Harİta
     </h2>
+    <button onclick="rotaCiz()">Click me</button>
     <!-- Icon -->
     <div class="divider-custom">
       <div class="divider-custom-line"></div>
@@ -84,6 +85,7 @@
         "251": [36.26143543050793, 41.342191291344776],
         "272": [36.26267693406108, 41.341548855114],
       };
+      let doluParkNoktalari = []
       var konum1Renk;
       var konum2Renk;
       var konum3renk;
@@ -91,7 +93,7 @@
       const kirmiziRenk = '#f01818';
       const accessKey = 'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
       let url2 = 'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
-      var start = [36.26197140494894, 41.341163928946884];
+      var start = [36.26197140494894, 41.141163928946884];
       var endp = [36.26267693406108, 41.341548855114];
       mapboxgl.accessToken = accessKey;
       var mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
@@ -165,32 +167,49 @@
         });
         // this is where the code from the next step will go
       });
-      map.on('load', async function (e) {
+
+
+      // Sayfa yüklendikten sonra her 5 saniyede bir fetchData fonksiyonunu çağır.
+      window.addEventListener('load', function () {
+        var fetchInterval = 5000;
+        setInterval(fetchData, fetchInterval);
+      });
+
+      // map.addControl(new mapboxgl.NavigationControl());
+      // map.addControl(new MapboxTraffic());
+
+      // Fonksiyonlarımız
+      async function rotaCiz() {
         const coordinates = [];
         // park noktalarının koordinatlarını yukarıdaki routes array'i içine at
         await Object.keys(parkNoktalari).forEach((key) => {
-          coordinates.push(parkNoktalari[key])
+          coordinates.push({
+            parkNoktasi: key,
+            location: parkNoktalari[key]
+          })
         })
 
         const start = async () => {
           const routes = [];
           // başlangıç noktasından her park noktasına olan süreyi bul ve yukarıdaki routes içine at
           await asyncForEach(coordinates, async (coordinate) => {
-            const res = await getRoute(coordinate)
+            const res = await getRoute(coordinate.location)
             routes.push({
-              location: coordinate,
+              parkNoktasi: coordinate.parkNoktasi,
+              location: coordinate.location,
               duration: res.duration
             })
           });
-
           // routes içindeki sürelerden en kısa süren rotayı bul
+          console.log(doluParkNoktalari);
+          console.log(routes);
           let smallest = {
             location: null,
             duration: 999999
           };
           for (var i = 0; i < routes.length; i++) {
-            console.log(routes[i].duration);
-            if (routes[i].duration < smallest.duration) {
+            const doluMu = doluParkNoktalari.includes(routes[i].parkNoktasi)
+            if (routes[i].duration < smallest.duration && !doluMu) {
               smallest = routes[i];
             }
           }
@@ -231,44 +250,33 @@
             }
           };
           map.addLayer({
-              id: 'route',
-              type: 'line',
-              source: {
-                type: 'geojson',
-                data: {
-                  type: 'Feature',
-                  properties: {},
-                  geometry: {
-                    type: 'LineString',
-                    coordinates: geojson
-                  }
+            id: 'route',
+            type: 'line',
+            source: {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: geojson
                 }
-              },
-              layout: {
-                'line-join': 'round',
-                'line-cap': 'round'
-              },
-              paint: {
-                'line-color': '#3887be',
-                'line-width': 5,
-                'line-opacity': 0.75
               }
-            });
+            },
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            paint: {
+              'line-color': '#3887be',
+              'line-width': 5,
+              'line-opacity': 0.75
+            }
+          });
           map.getSource('route').setData(geojson);
         }
         start();
-      });
-      
-      // Sayfa yüklendikten sonra her 5 saniyede bir fetchData fonksiyonunu çağır.
-      window.addEventListener('load', function () {
-        var fetchInterval = 5000;
-        setInterval(fetchData, fetchInterval);
-      });
-
-      // map.addControl(new mapboxgl.NavigationControl());
-      // map.addControl(new MapboxTraffic());
-
-      // Fonksiyonlarımız
+      }
       function fetchData() {
         fetch(url2)
           .then((res) => res.json())
@@ -277,10 +285,14 @@
           });
       }
       function setMarkers(data) {
+        doluParkNoktalari = []
         Object.keys(data).forEach((key) => {
           if (key.includes('field') && data[key] !== '0') {
             const available = data[key].substring(0, 1);
             const parkNoktasi = data[key].substring(1, data[key].length);
+            if (available !== '1') {
+              doluParkNoktalari.push(parkNoktasi);
+            }
             new mapboxgl.Marker({
               color: available === "1" ? yesilRenk : kirmiziRenk,
               draggable: false,
@@ -302,41 +314,6 @@
             // rotadaki tüm noktaların geometrik lokasyonları
             var data = json.routes[0];
             // if the route already exists on the map, reset it using setData
-            if (!map.getSource('route')) {
-              // var route = data.geometry.coordinates;
-              // var geojson = {
-              //   type: 'Feature',
-              //   properties: {},
-              //   geometry: {
-              //     type: 'LineString',
-              //     coordinates: route
-              //   }
-              // };
-              // map.addLayer({
-              //   id: 'route',
-              //   type: 'line',
-              //   source: {
-              //     type: 'geojson',
-              //     data: {
-              //       type: 'Feature',
-              //       properties: {},
-              //       geometry: {
-              //         type: 'LineString',
-              //         coordinates: geojson
-              //       }
-              //     }
-              //   },
-              //   layout: {
-              //     'line-join': 'round',
-              //     'line-cap': 'round'
-              //   },
-              //   paint: {
-              //     'line-color': '#3887be',
-              //     'line-width': 5,
-              //     'line-opacity': 0.75
-              //   }
-              // });
-            }
             resolve(json.routes[0])
             // add turn instructions here at the end
           };
@@ -376,10 +353,10 @@
         <div class="col-lg-4">
           <h4 class="text-uppercase mb-4">Biz</h4>
           <p class="lead mb-0">
-            <!-- <p> Doğukan BALCI</p>
+          <p> Doğukan BALCI</p>
           <p> Gökhan VEYİSOĞLU</p>
           <p> Binnaz DEMİRÇEVİREN</p>
-          <p> Feyza BOZKUŞ</p> -->
+          <p> Feyza BOZKUŞ</p>
           </p>
         </div>
       </div>
