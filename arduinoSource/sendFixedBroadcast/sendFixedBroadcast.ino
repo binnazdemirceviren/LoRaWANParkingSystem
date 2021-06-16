@@ -70,13 +70,7 @@ void loop(){
 	if(tempStatus != sensorStatus){
 		sensorStatus = delayedSensorResult();
 		if(tempStatus != sensorStatus){
-			//bool ackRecieved = false;
 			sendMessageToBrodcast((byte)sensorStatus, myAdr[0], myAdr[1]);
-			/*while(!ackRecieved){
-				ackRecieved = listenAck();
-				if(ackRecieved)
-					Serial.println("XXX");
-			}*/
 			tempStatus = sensorStatus;
 		}
 	}
