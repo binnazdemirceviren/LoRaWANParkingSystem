@@ -91,6 +91,7 @@
       var konum3renk;
       const yesilRenk = '#34c754';
       const kirmiziRenk = '#f01818';
+      var konum = [];
       const accessKey = 'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
       let url2 = 'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
       var start = [36.26197140494894, 41.141163928946884];
@@ -118,6 +119,40 @@
               }),
               'top-right'
             );
+              //Anlık konumu alıyor
+            let geolocate = new mapboxgl.GeolocateControl({
+              positionOptions: {
+                enableHighAccuracy: true,
+                watchPosition: true
+              }
+            });
+
+            map.addControl(geolocate);
+
+            geolocate.on('geolocate', (e) => {
+                map.addLayer({
+                  "id": "points",
+                  "type": "symbol",
+                  "source": {
+                    "type": "geojson",
+                    "data": {
+                      "type": "FeatureCollection",
+                      "features": [{
+                        "type": "Feature",
+                        "geometry": {
+                          "type": "Point",
+                          "coordinates": [e.coords.longitude, e.coords.latitude]
+                          
+                        }
+                      }]
+                    }
+                  },
+                });
+
+              konum = [e.coords.longitude, e.coords.latitude];
+              console.log(konum);
+            });
+
 
             Object.keys(parkNoktalari).forEach((key) => {
               new mapboxgl.Marker({
@@ -139,7 +174,7 @@
       map.on('load', function () {
         // make an initial directions request that
         // starts and ends at the same location
-        getRoute(start);
+        getRoute(konum);
 
         // Add starting point to the map
         map.addLayer({
@@ -154,7 +189,7 @@
                 properties: {},
                 geometry: {
                   type: 'Point',
-                  coordinates: start
+                  coordinates: konum
                 }
               }
               ]
@@ -304,7 +339,7 @@
       }
       async function getRoute(end) {
         return await new Promise((resolve, reject) => {
-          var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + start[0] + ',' + start[1] + ';' + end[0] + ',' + end[1] + '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken;
+          var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + konum[0] + ',' + konum[1] + ';' + end[0] + ',' + end[1] + '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken;
           // make an XHR request https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
           var req = new XMLHttpRequest();
           req.open('GET', url, true);
