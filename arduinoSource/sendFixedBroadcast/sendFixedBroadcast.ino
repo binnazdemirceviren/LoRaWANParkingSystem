@@ -101,7 +101,7 @@ int getSensorStatus(){
 int delayedSensorResult(){
 	int oneCount = 0;
 	int twoCount = 0;
-    while ((oneCount + twoCount) < 9){
+    while ((oneCount + twoCount) < 39){
 		int temp = getSensorStatus();
 		if (temp == 2)
             twoCount++;
