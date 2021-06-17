@@ -81,9 +81,9 @@
     <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
     <script>
       var parkNoktalari = {
-        "568": [41.1758420401287, 40.91256035174109],
-        "251": [41.17581264271037, 40.91264994591959],
-        "272": [41.175805, 40.912665],
+        "568": [40.912475, 41.175815],
+        "251": [40.912557, 41.175799],
+        "272": [40.912641, 41.175774],
       };
       let doluParkNoktalari = []
       var konum1Renk;
@@ -169,7 +169,7 @@
       var map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/traffic-day-v2',
-        center: [36.260682, 41.342564],
+        center: [40.912665, 41.175805],
         zoom: 15,
         hash: true
       });
