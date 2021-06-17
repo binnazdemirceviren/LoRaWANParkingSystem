@@ -118,7 +118,7 @@ void listenBroadcast(){
 
       	// Is something goes wrong print error
       	if (rsc.status.code != 1) {
-        	rsc.status.getResponseDescription();
+			rsc.status.getResponseDescription();
       	} else {
 			Serial.print("Mesaj kodu : ");
 			Serial.println(msg.code);
@@ -127,7 +127,7 @@ void listenBroadcast(){
 			Serial.println(msgAdress);
 
 			int code = MsgToCode(msg.code, msgAdress);
-            //Code Diziye eklenecek.
+			//Code Diziye eklenecek.
 			codeQueue.add(code);
 
 			rsc.close();
