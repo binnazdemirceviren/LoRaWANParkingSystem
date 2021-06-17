@@ -34,7 +34,6 @@
       width: 100%;
       height: 750px;
     }
-
   </style>
 </head>
 
@@ -63,117 +62,306 @@
   <!-- giriş bölümü-->
   <!-- Harita bölümü-->
   <section class="page-section Harita" id="Harita" style="width: auto; height: 1050px;">
-      <!-- Harita bölümü başlık-->
-      <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Harİta
-      </h2>
-      <!-- Icon -->
-      <div class="divider-custom">
-        <div class="divider-custom-line"></div>
-        <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-        <div class="divider-custom-line"></div>
-      </div>
-      <!-- Harita -->
-        <link rel="stylesheet"
-          href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
-          type="text/css" />
-        <div id="map" style="margin-top: 300px;"></div>
-        <script src="https://unpkg.com/es6-promise@4.2.4/dist/es6-promise.auto.min.js"></script>
-        <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
-        <script>
-          var parkNoktalari = {
-            "568": [36.260460555302664, 41.342952802563374],
-            "251": [36.26143543050793, 41.342191291344776],
-            "272": [36.26267693406108, 41.341548855114],
-
-          };
-          var konum1Renk;
-          var konum2Renk;
-          var konum3renk;
-          const yesilRenk = '#34c754';
-          const kirmiziRenk = '#f01818';
-          const accessKey = 'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
-          let url2 = 'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
-
-          var map;
-          function fetchData() {
-            fetch(url2)
-              .then((res) => res.json())
-              .then((out) => {
-                setMarkers(out);
-              });
-          }
-          window.addEventListener('load', function () {
-            fetch(url2)
-              .then((res) => res.json())
-              .then((out) => {
-                mapboxgl.accessToken = accessKey;
-                var mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
-                mapboxClient.geocoding
-                  .forwardGeocode({
-                    query: 'Atakum,Samsun',
-                    autocomplete: false,
-                    limit: 1,
-                  })
-                  .send()
-                  .then(function (response) {
-                    if (
-                      response &&
-                      response.body &&
-                      response.body.features &&
-                      response.body.features.length
-                    ) {
-                      var feature = response.body.features[0];
-
-                      map = new mapboxgl.Map({
-                        container: 'map',
-                        style: 'mapbox://styles/mapbox/traffic-day-v2',
-                        center: [36.260682, 41.342564],
-                        zoom: 15,
-                        hash: true
-                      });
-
-                      map.addControl(
-                        new MapboxDirections({
-                          accessToken: mapboxgl.accessToken,
-                        }),
-                        'top-right'
-                      );
-
-                      Object.keys(parkNoktalari).forEach((key) => {
-                        new mapboxgl.Marker({
-                          draggable: false,
-                          color: yesilRenk,
-                        })
-                          .setLngLat(parkNoktalari[key])
-                          .addTo(map);
-                      });
-                    }
-                  });
-              });
-            var fetchInterval = 5000;
-
-            setInterval(fetchData, fetchInterval);
-          });
-
-          function setMarkers(data) {
-            Object.keys(data).forEach((key) => {
-              if (key.includes('field') && data[key] !== '0') {
-                const available = data[key].substring(0, 1);
-                const parkNoktasi = data[key].substring(1, data[key].length);
-                new mapboxgl.Marker({
-                  color: available === "1" ? yesilRenk : kirmiziRenk,
-                  draggable: false,
-                })
-                  .setLngLat(parkNoktalari[parkNoktasi])
-                  .addTo(map);
+    <!-- Harita bölümü başlık-->
+    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Harİta
+    </h2>
+    <button onclick="rotaCiz()">Click me</button>
+    <!-- Icon -->
+    <div class="divider-custom">
+      <div class="divider-custom-line"></div>
+      <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+      <div class="divider-custom-line"></div>
+    </div>
+    <!-- Harita -->
+    <link rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
+      type="text/css" />
+    <div id="map" style="margin-top: 300px;"></div>
+    <script src="https://unpkg.com/es6-promise@4.2.4/dist/es6-promise.auto.min.js"></script>
+    <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
+    <script>
+      var parkNoktalari = {
+        "568": [36.260460555302664, 41.342952802563374],
+        "251": [36.26143543050793, 41.342191291344776],
+        "272": [36.26267693406108, 41.341548855114],
+      };
+      let doluParkNoktalari = []
+      var konum1Renk;
+      var konum2Renk;
+      var konum3renk;
+      const yesilRenk = '#34c754';
+      const kirmiziRenk = '#f01818';
+      var konum = [];
+      const accessKey = 'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
+      let url2 = 'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
+      var start = [36.26197140494894, 41.141163928946884];
+      var endp = [36.26267693406108, 41.341548855114];
+      mapboxgl.accessToken = accessKey;
+      var mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
+      mapboxClient.geocoding
+        .forwardGeocode({
+          query: 'Atakum,Samsun',
+          autocomplete: false,
+          limit: 1,
+        })
+        .send()
+        .then(function (response) {
+          if (
+            response &&
+            response.body &&
+            response.body.features &&
+            response.body.features.length
+          ) {
+            var feature = response.body.features[0];
+            map.addControl(
+              new MapboxDirections({
+                accessToken: mapboxgl.accessToken,
+              }),
+              'top-right'
+            );
+              //Anlık konumu alıyor
+            let geolocate = new mapboxgl.GeolocateControl({
+              positionOptions: {
+                enableHighAccuracy: true,
+                watchPosition: true
               }
             });
+
+            map.addControl(geolocate);
+
+            geolocate.on('geolocate', (e) => {
+                map.addLayer({
+                  "id": "points",
+                  "type": "symbol",
+                  "source": {
+                    "type": "geojson",
+                    "data": {
+                      "type": "FeatureCollection",
+                      "features": [{
+                        "type": "Feature",
+                        "geometry": {
+                          "type": "Point",
+                          "coordinates": [e.coords.longitude, e.coords.latitude]
+                          
+                        }
+                      }]
+                    }
+                  },
+                });
+
+              konum = [e.coords.longitude, e.coords.latitude];
+              console.log(konum);
+            });
+
+
+            Object.keys(parkNoktalari).forEach((key) => {
+              new mapboxgl.Marker({
+                draggable: false,
+                color: yesilRenk,
+              })
+                .setLngLat(parkNoktalari[key])
+                .addTo(map);
+            });
           }
-          
-map.addControl(new mapboxgl.NavigationControl());
-          map.addControl(new MapboxTraffic());
-        </script>
-      </div>
+        });
+      var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/traffic-day-v2',
+        center: [36.260682, 41.342564],
+        zoom: 15,
+        hash: true
+      });
+      map.on('load', function () {
+        // make an initial directions request that
+        // starts and ends at the same location
+        getRoute(konum);
+
+        // Add starting point to the map
+        map.addLayer({
+          id: 'point',
+          type: 'circle',
+          source: {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: [{
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Point',
+                  coordinates: konum
+                }
+              }
+              ]
+            }
+          },
+          paint: {
+            'circle-radius': 10,
+            'circle-color': '#3887be'
+          }
+        });
+        // this is where the code from the next step will go
+      });
+
+
+      // Sayfa yüklendikten sonra her 5 saniyede bir fetchData fonksiyonunu çağır.
+      window.addEventListener('load', function () {
+        var fetchInterval = 5000;
+        setInterval(fetchData, fetchInterval);
+      });
+
+      // map.addControl(new mapboxgl.NavigationControl());
+      // map.addControl(new MapboxTraffic());
+
+      // Fonksiyonlarımız
+      async function rotaCiz() {
+        const coordinates = [];
+        // park noktalarının koordinatlarını yukarıdaki routes array'i içine at
+        await Object.keys(parkNoktalari).forEach((key) => {
+          coordinates.push({
+            parkNoktasi: key,
+            location: parkNoktalari[key]
+          })
+        })
+
+        const start = async () => {
+          const routes = [];
+          // başlangıç noktasından her park noktasına olan süreyi bul ve yukarıdaki routes içine at
+          await asyncForEach(coordinates, async (coordinate) => {
+            const res = await getRoute(coordinate.location)
+            routes.push({
+              parkNoktasi: coordinate.parkNoktasi,
+              location: coordinate.location,
+              duration: res.duration
+            })
+          });
+          // routes içindeki sürelerden en kısa süren rotayı bul
+          console.log(doluParkNoktalari);
+          console.log(routes);
+          let smallest = {
+            location: null,
+            duration: 999999
+          };
+          for (var i = 0; i < routes.length; i++) {
+            const doluMu = doluParkNoktalari.includes(routes[i].parkNoktasi)
+            if (routes[i].duration < smallest.duration && !doluMu) {
+              smallest = routes[i];
+            }
+          }
+
+          // bulduğumuz en yakın park noktasının koordinatına nokta ekle
+          map.addLayer({
+            id: 'end',
+            type: 'circle',
+            source: {
+              type: 'geojson',
+              data: {
+                type: 'FeatureCollection',
+                features: [{
+                  type: 'Feature',
+                  properties: {},
+                  geometry: {
+                    type: 'Point',
+                    coordinates: smallest.location
+                  }
+                }]
+              }
+            },
+            paint: {
+              'circle-radius': 10,
+              'circle-color': '#f30'
+            }
+          });
+
+
+          // bulduğumuz en yakın park noktasına giden rotayı bul ve yol çiz
+          const latestRoute = await getRoute(smallest.location);
+          var geojson = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: latestRoute.geometry.coordinates
+            }
+          };
+          map.addLayer({
+            id: 'route',
+            type: 'line',
+            source: {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: geojson
+                }
+              }
+            },
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            paint: {
+              'line-color': '#3887be',
+              'line-width': 5,
+              'line-opacity': 0.75
+            }
+          });
+          map.getSource('route').setData(geojson);
+        }
+        start();
+      }
+      function fetchData() {
+        fetch(url2)
+          .then((res) => res.json())
+          .then((out) => {
+            setMarkers(out);
+          });
+      }
+      function setMarkers(data) {
+        doluParkNoktalari = []
+        Object.keys(data).forEach((key) => {
+          if (key.includes('field') && data[key] !== '0') {
+            const available = data[key].substring(0, 1);
+            const parkNoktasi = data[key].substring(1, data[key].length);
+            if (available !== '1') {
+              doluParkNoktalari.push(parkNoktasi);
+            }
+            new mapboxgl.Marker({
+              color: available === "1" ? yesilRenk : kirmiziRenk,
+              draggable: false,
+            })
+              .setLngLat(parkNoktalari[parkNoktasi])
+              .addTo(map);
+          }
+        });
+      }
+      async function getRoute(end) {
+        return await new Promise((resolve, reject) => {
+          var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + konum[0] + ',' + konum[1] + ';' + end[0] + ',' + end[1] + '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken;
+          // make an XHR request https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+          var req = new XMLHttpRequest();
+          req.open('GET', url, true);
+
+          req.onload = function () {
+            var json = JSON.parse(req.response);
+            // rotadaki tüm noktaların geometrik lokasyonları
+            var data = json.routes[0];
+            // if the route already exists on the map, reset it using setData
+            resolve(json.routes[0])
+            // add turn instructions here at the end
+          };
+          req.send();
+        });
+      }
+      async function asyncForEach(array, callback) {
+        for (let index = 0; index < array.length; index++) {
+          await callback(array[index], index, array);
+        }
+      }
+    </script>
+    </div>
     </div>
   </section>
   <!-- Footer-->
@@ -206,7 +394,7 @@ map.addControl(new mapboxgl.NavigationControl());
           <p> Feyza BOZKUŞ</p>
           </p>
         </div>
-    </div>
+      </div>
   </footer>
   <div class="copyright py-4 text-center text-white">
   </div>
