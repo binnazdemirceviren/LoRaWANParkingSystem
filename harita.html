@@ -47,7 +47,7 @@
       font-size: 16px;
       margin: 4px 2px;
       cursor: pointer;
-      margin-top: 50px;
+      margin-top: -30px;
       margin-left: 43%;
     }
 
@@ -128,18 +128,18 @@
     <!-- Harita bölümü başlık-->
     <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Harİta
     </h2>
-    <button onclick="rotaCiz()" class="button">En Yakın Park Yerini Bul</button>
     <!-- Icon -->
     <div class="divider-custom">
       <div class="divider-custom-line"></div>
       <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
       <div class="divider-custom-line"></div>
     </div>
+    <button onclick="rotaCiz()" class="button">En Yakın Park Yerini Bul</button>
     <!-- Harita -->
     <link rel="stylesheet"
       href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
       type="text/css" />
-    <div id="map" style="margin-top: 400px;">
+    <div id="map" style="margin-top: 300px;">
       <div id="instructions"></div>
     </div>
     <script src="https://unpkg.com/es6-promise@4.2.4/dist/es6-promise.auto.min.js"></script>
@@ -226,9 +226,8 @@
                 color: yesilRenk,
               })
                 .setLngLat(parkNoktalari[key])
-                .setPopup( new mapboxgl.Popup({ offset: 25 }) // add popups
-                .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
-
+                .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                  .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
@@ -283,6 +282,11 @@
       // map.addControl(new MapboxTraffic());
 
       // Fonksiyonlarımız
+
+
+      async function YerAyir(isim, Soyisim, Plaka, time) {
+        preventDefault(); 
+      };
       async function rotaCiz() {
         const coordinates = [];
         // park noktalarının koordinatlarını yukarıdaki routes array'i içine at
@@ -409,7 +413,9 @@
               draggable: false,
             })
               .setLngLat(parkNoktalari[parkNoktasi])
-              .addTo(map);
+              .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                  .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim, Soyisim, Plaka, time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+                .addTo(map);
           }
         });
       }
