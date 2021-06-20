@@ -45,7 +45,7 @@
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
-  margin-top: -100px;
+  margin-top: 50px;
   margin-left: 43%;
 }
 
@@ -80,15 +80,9 @@
   <!-- Harita bölümü-->
   <section class="page-section Harita" id="Harita" style="width: auto; height: 1050px;">
     <!-- Harita bölümü başlık-->
-    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Harİta
+    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Yeriniz rezerve edildi
     </h2>
 
-    <!-- Icon -->
-    <div class="divider-custom">
-      <div class="divider-custom-line"></div>
-      <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-      <div class="divider-custom-line"></div>
-    </div>
     <!-- Harita -->
     <link rel="stylesheet"
       href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
@@ -185,7 +179,7 @@
               })
                 .setLngLat(parkNoktalari[key])
                 .setPopup( new mapboxgl.Popup({ offset: 25 }) // add popups
-                .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+                .setHTML('<form action=""><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
