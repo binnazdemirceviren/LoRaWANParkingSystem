@@ -50,6 +50,7 @@
 }
 
 .button {background-color: #2c3e50;} /* Blue */
+
   </style>
 </head>
 
@@ -113,6 +114,8 @@
       let url2 = 'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
       var start = [36.26197140494894, 41.141163928946884];
       var endp = [36.26267693406108, 41.341548855114];
+
+      
       mapboxgl.accessToken = accessKey;
       var mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
       mapboxClient.geocoding
@@ -172,13 +175,17 @@
               console.log(konum);
             });
 
+            
 
             Object.keys(parkNoktalari).forEach((key) => {
               new mapboxgl.Marker({
                 draggable: false,
                 color: yesilRenk,
+                
               })
                 .setLngLat(parkNoktalari[key])
+                .setPopup( new mapboxgl.Popup({ offset: 25 }) // add popups
+                .setHTML('<form action="/action_page.php"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
@@ -233,6 +240,7 @@
       // map.addControl(new MapboxTraffic());
 
       // Fonksiyonlarımız
+      async function YerAyir() {};
       async function rotaCiz() {
         const coordinates = [];
         // park noktalarının koordinatlarını yukarıdaki routes array'i içine at
@@ -352,6 +360,8 @@
               draggable: false,
             })
               .setLngLat(parkNoktalari[parkNoktasi])
+              .setPopup( new mapboxgl.Popup({ offset: 25 }) // add popups
+              .setHTML('<form action="/action_page.php"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: 0%;">Yer Ayırt</button></form> '))
               .addTo(map);
           }
         });
