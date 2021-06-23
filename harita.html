@@ -17,7 +17,7 @@
     type="text/css" />
   <!--(includes Bootstrap)-->
   <link href="css/styles.css" rel="stylesheet" />
-  />
+
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.js"></script>
 
@@ -32,7 +32,7 @@
       top: 0;
       bottom: 0;
       width: 100%;
-      height: 750px;
+      height: 700px;
     }
 
     .button {
@@ -47,8 +47,8 @@
       font-size: 16px;
       margin: 4px 2px;
       cursor: pointer;
-      margin-top: -30px;
-      margin-left: 42%;
+      margin-top: 0px;
+      margin-left: 43%;
     }
 
     .button {
@@ -190,8 +190,9 @@
             let geolocate = new mapboxgl.GeolocateControl({
               positionOptions: {
                 enableHighAccuracy: true,
-                watchPosition: true
-              }
+                watchPosition: true,
+              },
+              trackuserlocationname: true
             });
 
             map.addControl(geolocate);
@@ -222,14 +223,13 @@
 
             Object.keys(parkNoktalari).forEach((key) => {
               new mapboxgl.Marker({
-                draggable: false,
+                draggable: true,
                 color: yesilRenk,
               })
                 .setLngLat(parkNoktalari[key])
                 .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                  .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="dakika">Rezerve etmek istediğiniz süre (dk):</label><input type="number" id="dakika" name="dakika" min="5" max="20"> <input type="hidden" id="konum" name="konum" value={{[parkNoktasi]}}><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,dakika,konum)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+                  .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
-                //konum değişkeni eklenecek
             });
           }
         });
@@ -286,7 +286,7 @@
 
 
       async function YerAyir(isim, Soyisim, Plaka, time) {
-        preventDefault(); 
+        preventDefault();
       };
       async function rotaCiz() {
         const coordinates = [];
@@ -411,12 +411,12 @@
             }
             new mapboxgl.Marker({
               color: available === "1" ? yesilRenk : kirmiziRenk,
-              draggable: false,
+              draggable: true,
             })
               .setLngLat(parkNoktalari[parkNoktasi])
               .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-              .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="dakika">Rezerve etmek istediğiniz süre (dk):</label><input type="number" id="dakika" name="dakika" min="5" max="20"> <input type="hidden" id="konum" name="konum" value=smallest.location><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,dakika,konum)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
-                .addTo(map);
+                .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+              .addTo(map);
           }
         });
       }
