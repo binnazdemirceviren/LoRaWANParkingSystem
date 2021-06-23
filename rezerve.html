@@ -126,7 +126,8 @@
   <!-- Harita bölümü-->
   <section class="page-section Harita" id="Harita" style="width: auto; height: 1050px;">
     <!-- Harita bölümü başlık-->
-    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Yeriniz Rezerve Edildi
+    <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0" style="margin-top: 20px;">Yeriniz
+      Rezerve Edildi
     </h2>
     <!-- Icon -->
     <div class="divider-custom">
@@ -134,7 +135,7 @@
       <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
       <div class="divider-custom-line"></div>
     </div>
-    <button onclick="rotaCiz()" class="button">En Yakın Park Yerini Bul</button>
+    <!--- <button onclick="rotaCiz()" class="button">En Yakın Park Yerini Bul</button>-->
     <!-- Harita -->
     <link rel="stylesheet"
       href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
@@ -196,6 +197,7 @@
 
             map.addControl(geolocate);
 
+
             geolocate.on('geolocate', (e) => {
               map.addLayer({
                 "id": "points",
@@ -220,6 +222,12 @@
             });
 
 
+            map.on('load', function () {
+              //geolocate.trigger();
+              //getRoute(smallest.location);
+              geoFindMe();
+            });
+
             Object.keys(parkNoktalari).forEach((key) => {
               new mapboxgl.Marker({
                 draggable: false,
@@ -227,7 +235,7 @@
               })
                 .setLngLat(parkNoktalari[key])
                 .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                  .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+                  .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
@@ -242,7 +250,7 @@
       map.on('load', function () {
         // make an initial directions request that
         // starts and ends at the same location
-        getRoute(konum);
+        //getRoute(konum);
 
         // Add starting point to the map
         map.addLayer({
@@ -283,47 +291,43 @@
 
       // Fonksiyonlarımız
 
+      function geoFindMe() {
+
+        console.log("deneme");
+
+
+        function success(position) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const location = urlParams.get("coordinate");
+          console.log('parametre lokasyon', location);
+          konum = [position.coords.latitude, position.coords.longitude];
+          const parkNoktasi = location.split(",");
+          rotaCiz(parkNoktasi);
+        }
+
+        function error() {
+        }
+
+        if (!navigator.geolocation) {
+          status.textContent = 'Geolocation is not supported by your browser';
+        } else {
+          status.textContent = 'Locating…';
+          navigator.geolocation.getCurrentPosition(success, error);
+        }
+
+      }
 
       async function YerAyir(isim, Soyisim, Plaka, time) {
-        preventDefault(); 
+        preventDefault();
       };
-      async function rotaCiz() {
-        const coordinates = [];
-        // park noktalarının koordinatlarını yukarıdaki routes array'i içine at
-        await Object.keys(parkNoktalari).forEach((key) => {
-          coordinates.push({
-            parkNoktasi: key,
-            location: parkNoktalari[key]
-          })
-        })
+      async function rotaCiz(parkNoktasi) {
 
         const start = async () => {
-          const routes = [];
-          // başlangıç noktasından her park noktasına olan süreyi bul ve yukarıdaki routes içine at
-          await asyncForEach(coordinates, async (coordinate) => {
-            const res = await getRoute(coordinate.location)
-            routes.push({
-              parkNoktasi: coordinate.parkNoktasi,
-              location: coordinate.location,
-              duration: res.duration,
-              steps: res.legs[0].steps
-            })
-          });
-          // routes içindeki sürelerden en kısa süren rotayı bul
-          let smallest = {
-            location: null,
-            duration: 999999,
-            steps: []
-          };
-          for (var i = 0; i < routes.length; i++) {
-            const doluMu = doluParkNoktalari.includes(routes[i].parkNoktasi)
-            if (routes[i].duration < smallest.duration && !doluMu) {
-              smallest = routes[i];
-            }
-          }
+          const smallest = await getRoute(parkNoktasi)
+          console.log('smallest', smallest);
           var instructions = document.getElementById('instructions');
           instructions.style.display = "block"
-          const steps = smallest.steps
+          const steps = smallest.legs[0].steps
           var tripInstructions = [];
           for (var i = 0; i < steps.length; i++) {
             tripInstructions.push('<br><li>' + steps[i].maneuver.instruction) + '</li>';
@@ -355,13 +359,12 @@
 
 
           // bulduğumuz en yakın park noktasına giden rotayı bul ve yol çiz
-          const latestRoute = await getRoute(smallest.location);
           var geojson = {
             type: 'Feature',
             properties: {},
             geometry: {
               type: 'LineString',
-              coordinates: latestRoute.geometry.coordinates
+              coordinates: smallest.geometry.coordinates
             }
           };
           map.addLayer({
@@ -414,8 +417,8 @@
             })
               .setLngLat(parkNoktalari[parkNoktasi])
               .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                  .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim, Soyisim, Plaka, time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
-                .addTo(map);
+                .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+              .addTo(map);
           }
         });
       }
