@@ -234,8 +234,6 @@
                 color: yesilRenk,
               })
                 .setLngLat(parkNoktalari[key])
-                .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                  .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
@@ -316,10 +314,6 @@
         }
 
       }
-
-      async function YerAyir(isim, Soyisim, Plaka, time) {
-        preventDefault();
-      };
       async function rotaCiz(parkNoktasi) {
 
         const start = async () => {
@@ -416,8 +410,6 @@
               draggable: false,
             })
               .setLngLat(parkNoktalari[parkNoktasi])
-              .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
               .addTo(map);
           }
         });
