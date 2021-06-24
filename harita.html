@@ -223,7 +223,7 @@
 
             Object.keys(parkNoktalari).forEach((key) => {
               new mapboxgl.Marker({
-                draggable: true,
+                draggable: false,
                 color: yesilRenk,
               })
                 .setLngLat(parkNoktalari[key])
@@ -411,7 +411,7 @@
             }
             new mapboxgl.Marker({
               color: available === "1" ? yesilRenk : kirmiziRenk,
-              draggable: true,
+              draggable: false,
             })
               .setLngLat(parkNoktalari[parkNoktasi])
               .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
