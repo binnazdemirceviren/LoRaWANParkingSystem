@@ -235,6 +235,8 @@
                 color: yesilRenk,
               })
                 .setLngLat(parkNoktalari[key])
+                .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                  .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
@@ -298,37 +300,11 @@
         function success(position) {
           const urlParams = new URLSearchParams(window.location.search);
           const location = urlParams.get("coordinate");
-          console.log('parametre lokasyon', parkNok);
-          konum = [position.coords.longitude, position.coords.latitude];
+          console.log('parametre lokasyon', location);
+          konum = [position.coords.latitude, position.coords.longitude];
           const parkNoktasi = location.split(",");
-        
           rotaCiz(parkNoktasi);
-          map.addLayer({
-            id: 'end',
-            type: 'circle',
-            source: {
-              type: 'geojson',
-              data: {
-                type: 'FeatureCollection',
-                features: [{
-                  type: 'Feature',
-                  properties: {},
-                  geometry: {
-                    type: 'Point',
-                    coordinates: konum
-                  }
-                }]
-              }
-            },
-            paint: {
-              'circle-radius': 10,
-              'circle-color': '#f30'
-            }
-          });
-          
         }
-
-        
 
         function error() {
         }
@@ -341,6 +317,10 @@
         }
 
       }
+
+      async function YerAyir(isim, Soyisim, Plaka, time) {
+        preventDefault();
+      };
       async function rotaCiz(parkNoktasi) {
 
         const start = async () => {
@@ -430,7 +410,6 @@
         doluParkNoktalari = []
         Object.keys(data).forEach((key) => {
           if (key.includes('field') && data[key] !== '0') {
-            console.log('created_at');
             const available = data[key].substring(0, 1);
             const parkNoktasi = data[key].substring(1, data[key].length);
             if (available !== '1') {
@@ -441,6 +420,8 @@
               draggable: false,
             })
               .setLngLat(parkNoktalari[parkNoktasi])
+              .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                .setHTML('<form action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz saat: </label><input id="time" type="time" name="time" value=()><p></p><button onclick="YerAyir(isim, Soyisim, Plaka, time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
               .addTo(map);
           }
         });
