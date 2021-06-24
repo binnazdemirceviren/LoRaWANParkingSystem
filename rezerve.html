@@ -303,7 +303,7 @@
           const urlParams = new URLSearchParams(window.location.search);
           const location = urlParams.get("coordinate");
           console.log('parametre lokasyon', location);
-          konum = [position.coords.latitude, position.coords.longitude];
+          konum = [position.coords.longitude, position.coords.latitude];
           const parkNoktasi = location.split(",");
           rotaCiz(parkNoktasi);
         }
