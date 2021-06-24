@@ -156,6 +156,7 @@
       var konum3renk;
       const yesilRenk = '#34c754';
       const kirmiziRenk = '#f01818';
+      var parkBilgisi = '';
       var konum = [];
       const accessKey = 'pk.eyJ1IjoiZGF2b3QxMzY5NSIsImEiOiJja3BiYmR4YzQxMTVvMm9tcHBiNW80cm1yIn0.4AoItntaVis_s_-MJzUfOw';
       let url2 = 'https://api.thingspeak.com/channels/1380146/feeds/last.json?api_key=U09E9TP3T8NQSGHN';
@@ -228,7 +229,7 @@
               })
                 .setLngLat(parkNoktalari[key])
                 .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-                  .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz süre: </label><input id="time" type="number" name="time" value=() min="5" max="20"><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+                  .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="' + parkNoktalari[key] + '"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz süre: </label><input id="time" type="number" name="time" value=() min="5" max="20"><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
                 .addTo(map);
             });
           }
@@ -397,7 +398,11 @@
         fetch(url2)
           .then((res) => res.json())
           .then((out) => {
-            setMarkers(out);
+            if (parkBilgisi !== out.created_at) {
+              setMarkers(out);
+              parkBilgisi = out.created_at
+            }
+
           });
       }
       function setMarkers(data) {
@@ -415,7 +420,7 @@
             })
               .setLngLat(parkNoktalari[parkNoktasi])
               .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-              .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="'+parkNoktalari[key]+'"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz süre: </label><input id="time" type="number" name="time" value=() min="5" max="20"><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
+              .setHTML('<form method="get" action="rezerve.html"><label for="isim">İsim:</label><br><input type="text" id="isim" name="isim" value=""><br><input type="text" style="display:none" id="coordinate" name="coordinate" value="' + parkNoktalari[key] + '"><label for="Soyisim">Soyisim:</label><br><input type="text" id="Soyisim" name="Soyisim" value=""><br><br><label for="Plaka">Plaka:</label><br><input type="text" id="Plaka" name="Plaka" value=""><br><br><label for="time">Yer ayırtmak istediğiniz süre: </label><input id="time" type="number" name="time" value=() min="5" max="20"><p></p><button onclick="YerAyir(isim,Soyisim,Plaka,time)" class="button" style"  margin-left: -100px;;">Yer Ayırt</button></form> '))
               .addTo(map);
           }
         });
